@@ -10,12 +10,12 @@ This application is a CCC102 Finals Project showcasing OOP and Swing GUI skills 
 
 1. 🔨 **Build:**
 ```bash
-make build-final
+make
 ```
 
 2. ▶️ **Run:**
 ```bash
-java -jar Linearizz.jar
+make run
 ```
    
 ## Milestone
