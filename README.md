@@ -6,6 +6,9 @@ Linearizz does it for you in a few pindot2x!!!
 
 This application is a CCC102 Finals Project showcasing OOP and Swing GUI skills I've learned throughout the semester. 💻
 
+## What Does It Look Like?
+![image info](./resources/sample-ss.png)
+
 ## How to Reproduce the Application?
 
 1. 🔨 **Build:**

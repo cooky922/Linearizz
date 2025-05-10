@@ -1,8 +1,9 @@
 SRC_MAIN_DIR := src/main/java
 SRC_TEST_DIR := src/test/java
 BIN_DIR := bin
+RESOURCE_DIR := resources
 JAR_FILE := Linearizz.jar
-MAIN_CLS := ccc102.linearizz.test.TerminalMode
+MAIN_CLS := ccc102.linearizz.test.GUIMode
 
 SRC_MAIN_FILES := \
 	$(wildcard $(SRC_MAIN_DIR)/ccc102/linearizz/*.java) \
@@ -29,7 +30,7 @@ build-test:
 
 build-jar:
 	@echo Building 'Linearizz.jar'
-	@jar cfe $(JAR_FILE) $(MAIN_CLS) -C $(BIN_DIR) .
+	@jar cfe $(JAR_FILE) $(MAIN_CLS) -C $(BIN_DIR) . -C $(RESOURCE_DIR) .
 
 build: build-main build-test build-jar
 
