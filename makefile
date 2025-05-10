@@ -7,7 +7,8 @@ MAIN_CLS := ccc102.linearizz.test.TerminalMode
 SRC_MAIN_FILES := \
 	$(wildcard $(SRC_MAIN_DIR)/ccc102/linearizz/*.java) \
 	$(wildcard $(SRC_MAIN_DIR)/ccc102/linearizz/tokens/*.java) \
-	$(wildcard $(SRC_MAIN_DIR)/ccc102/linearizz/exceptions/*.java)
+	$(wildcard $(SRC_MAIN_DIR)/ccc102/linearizz/exceptions/*.java) \
+	$(wildcard $(SRC_MAIN_DIR)/ccc102/linearizz/system/*.java)
 
 SRC_TEST_FILES := \
 	$(wildcard $(SRC_TEST_DIR)/ccc102/linearizz/test/*.java)
@@ -34,4 +35,3 @@ build: build-main build-test build-jar
 
 run:
 	@java -jar $(JAR_FILE)
-
