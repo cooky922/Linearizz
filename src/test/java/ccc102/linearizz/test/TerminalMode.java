@@ -4,6 +4,7 @@ import java.util.Scanner;
 import java.util.Map;
 import java.util.HashMap;
 import ccc102.linearizz.*;
+import ccc102.linearizz.system.*;
 import ccc102.linearizz.exceptions.LinearSystemException;
 
 public class TerminalMode {
@@ -62,11 +63,13 @@ class AboutCommand extends Command {
 
 class SolveCommand extends Command {
     private Scanner scan;
-    private LinearSystemEnvironment env;
+    private Variables variables;
+    private Equations equations;
 
     public SolveCommand(Scanner scan) {
         this.scan = scan;
-        env = new LinearSystemEnvironment();
+        variables = new Variables();
+        equations = new Equations(variables);
     }
 
     public boolean execute() {
@@ -79,45 +82,43 @@ class SolveCommand extends Command {
 
     private boolean executeOne() {
         // enter variable names
-        if (!env.hasRegisteredVariableNames()) {
+        if (variables.isEmpty()) {
             System.out.print("Enter variable names > ");
             String[] names = scan.nextLine().split("\\s+");
             try {
-                env.registerVariableNames(names);
+                variables.addAll(names);
             } catch (Exception e) {
                 System.out.println("[Error: " + e.getMessage() + "]");
-                env.unregisterVariableNames();
+                variables.clear();
                 return true;
             }
         }
         // enter equations [guaranteed #equation = #unknown]
-        final int equationCount = env.getVariableNames().size();
-        String[] equations = new String[equationCount];
+        final int equationCount = variables.count();
+        String[] equationStrs = new String[equationCount];
 
         System.out.println("Enter " + equationCount + " equations below: ");
         for (int i = 0; i < equationCount; ++i) {
             System.out.print("> ");
-            equations[i] = scan.nextLine().trim();
+            equationStrs[i] = scan.nextLine().trim();
             try {
-                env.validateEquation(equations[i]);
+                equations.add(equationStrs[i]);
             } catch (Exception e) {
                 System.out.println("[Error: " + e.getMessage() + "]");
                 --i;
                 continue;
             }
         }
-        // not needed to be handled since every equation has already been validated
-        env.registerEquations(equations);
-
+        ExtractResult extracts = equations.extractValues();
         // solve equations
-        Matrix A = env.extractCoefficients();
-        Vector b = env.extractConstants();
+        Matrix A = extracts.getCoefficients();
+        Vector b = extracts.getConstants();
         try {
-            Vector x = LinearSystem.solve(A, b);
+            Vector x = Solver.solve(A, b);
             System.out.println("Output:");
             System.out.println("[The system has one solution]");
             System.out.print("[");
-            String[] names = env.getOrderedVariableNames();
+            String[] names = variables.getNames();
             boolean printComma = false;
             for (int i = 0; i < equationCount; ++i) {
                 if (printComma)
@@ -139,15 +140,14 @@ class SolveCommand extends Command {
                 default:;
             }
         }
-        env.unregisterEquations();
-
+        equations.clear();
         // try again?
         do {
             System.out.print("Do you want to try again (Y/S/N)? > ");
             char prompt = Character.toUpperCase(scan.nextLine().trim().charAt(0));
             switch (prompt) {
                 case 'Y':
-                    env.unregisterVariableNames();
+                    variables.clear();
                     return true;
                 // yes, and uses the same variable names
                 case 'S':
@@ -155,7 +155,7 @@ class SolveCommand extends Command {
 
                 // no
                 case 'N':
-                    env.unregisterVariableNames();
+                    variables.clear();
                     return false;
                 
                 // invalid prompt
@@ -164,36 +164,4 @@ class SolveCommand extends Command {
             }
         } while (true);
     }
-
 }
-
-/*
-
-Welcome to Linearizz: Terminal Mode 
-------------------------------------------
-This linearizz will help you solve system of linear equations
-
-.quit  -> exit the terminal
-.help  -> validity of the input
-.about -> provide more information about the program
-.solve -> solve the system of linear equations
-.vars  -> build variable set [TODO]
-
--------- under .solve 
-enter number of variables variable names >
-[scanning variable names ...] (will not print)
-[error: __] (will print, can try again)
-enter N equations below:
-> [...]
-[scanning equation ...] (will not print)
-[error: __] (will print, can try again)
-[calculating the results ...]
-output:
-[the system has (no solutions|one solution|infinitely many solutions)]
-[x = _, y = _, z = _] (will print if it has one solution)
-do you want to try again (Y/S/N)?
-(Y - yes)
-(S - yes but with the same variable names)
-(N - no, exiting .solve mode)
-...
-*/
