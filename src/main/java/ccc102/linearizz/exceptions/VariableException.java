@@ -10,7 +10,7 @@ public class VariableException extends RuntimeException {
 
     public static enum Kind {
         InvalidName,    // the variable name is invalid
-        AlreadyExisted, // the variable has already existed
+        AlreadyExisted, // the variable name already exists
         EmptyString     // the variable name is empty
     }
 
@@ -19,7 +19,7 @@ public class VariableException extends RuntimeException {
             case Kind.InvalidName:
                 return "the variable name is invalid";
             case Kind.AlreadyExisted:
-                return "the variable has already existed";
+                return "the variable name already exists";
             case Kind.EmptyString:
                 return "the variable name is empty";
             default:

@@ -9,7 +9,8 @@ SRC_MAIN_FILES := \
 	$(wildcard $(SRC_MAIN_DIR)/ccc102/linearizz/*.java) \
 	$(wildcard $(SRC_MAIN_DIR)/ccc102/linearizz/tokens/*.java) \
 	$(wildcard $(SRC_MAIN_DIR)/ccc102/linearizz/exceptions/*.java) \
-	$(wildcard $(SRC_MAIN_DIR)/ccc102/linearizz/system/*.java)
+	$(wildcard $(SRC_MAIN_DIR)/ccc102/linearizz/system/*.java) \
+	$(wildcard $(SRC_MAIN_DIR)/ccc102/linearizz/gui/*.java)
 
 SRC_TEST_FILES := \
 	$(wildcard $(SRC_TEST_DIR)/ccc102/linearizz/test/*.java)
