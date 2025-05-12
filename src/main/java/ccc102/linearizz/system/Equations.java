@@ -51,9 +51,14 @@ public class Equations {
         equationTokens.clear();
     }
 
+    // only parse, not add yet
+    public void validateEquation(String equation) throws EquationException {
+        parseEquation(equation.trim(), false);
+    }
+
     // add an equation
     public void add(String equation) throws EquationException {
-        equationTokens.add(parseEquation(equation.trim()));
+        equationTokens.add(parseEquation(equation.trim(), true));
     }
 
     // add equations
@@ -62,7 +67,7 @@ public class Equations {
             add(equation);
     }
 
-    public void addAll(Collection<? extends String> c) throws EquationException {
+    public void addAll(Iterable<? extends String> c) throws EquationException {
         for (String equation : c)
             add(equation);
     }
@@ -149,7 +154,10 @@ public class Equations {
     //
     // <variable-name>
     // | <letter> <digit (>= 0) ...>
-    private List<Token> parseEquation(String eq) throws EquationException {
+    private List<Token> parseEquation(String eq, boolean savesVariables) throws EquationException {
+        if (eq.isEmpty())
+            throw new EquationException(EquationException.Kind.EmptyString);
+
         List<Token> tokens = new ArrayList<>();
         Variables newVariables = new Variables();
 
@@ -236,8 +244,8 @@ public class Equations {
                 // if autoAdd = false, throw if it doesn't contain the key
                 // if autoAdd = true, add the variable name to the set
                 if (autoAdd) {
-                    if (!variables.containsName(name) || !newVariables.containsName(name))
-                        newVariables.add(name);
+                    if (!newVariables.containsName(name) || !variables.containsName(name))
+                        newVariables.addIfNew(name);
                 } else {
                     if (!variables.containsName(name))
                         throw new EquationException(EquationException.Kind.NoVariableFound);
@@ -259,8 +267,8 @@ public class Equations {
         else if (tokens.get(tokens.size() - 1) instanceof EqualToken)
             throw new EquationException(EquationException.Kind.NoExprAfterEqual);
 
-        if (autoAdd)
-            variables.addAll(newVariables);
+        if (autoAdd && savesVariables)
+            variables.addAllIfNew(newVariables);
 
         return tokens;
     }
