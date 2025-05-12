@@ -16,7 +16,8 @@ public class EquationException extends RuntimeException {
         UnseparatedTerms,    // terms are not separated by '+' or '-'
         InvalidCharacter,    // invalid character
         InvalidVariableName, // invalid variable name
-        NoVariableFound      // no variable found
+        NoVariableFound,     // no variable found
+        EmptyString          // empty string
     }
 
     private static String createMessageFromKind(Kind kind) {
@@ -39,6 +40,8 @@ public class EquationException extends RuntimeException {
                      + "the name must only have one leading letter";
             case Kind.NoVariableFound:
                 return "the equation contains a variable that doesn't exist";
+            case Kind.EmptyString:
+                return "the equation is empty";
             default:
                 return "unknown error";
         }

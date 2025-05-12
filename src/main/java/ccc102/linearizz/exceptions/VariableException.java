@@ -9,8 +9,9 @@ public class VariableException extends RuntimeException {
     }
 
     public static enum Kind {
-        InvalidName,   // the variable name is invalid
-        AlreadyExisted // the variable has already existed
+        InvalidName,    // the variable name is invalid
+        AlreadyExisted, // the variable has already existed
+        EmptyString     // the variable name is empty
     }
 
     private static String createMessageFromKind(Kind kind) {
@@ -19,6 +20,8 @@ public class VariableException extends RuntimeException {
                 return "the variable name is invalid";
             case Kind.AlreadyExisted:
                 return "the variable has already existed";
+            case Kind.EmptyString:
+                return "the variable name is empty";
             default:
                 return "unknown error";
         }
