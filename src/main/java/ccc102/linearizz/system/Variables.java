@@ -42,6 +42,8 @@ public class Variables {
     }
 
     public void add(String name) throws VariableException {
+        if (name.isEmpty())
+            throw new VariableException(VariableException.Kind.EmptyString);
         if (!isValidName(name))
             throw new VariableException(VariableException.Kind.InvalidName);
         final int index = variableSet.size();
@@ -50,18 +52,44 @@ public class Variables {
         variableSet.put(name, index);
     }
 
+    // same as 'add' but it does no effect when the variable 'name' already exists
+    public void addNew(String name) throws VariableException {
+        if (name.isEmpty())
+            throw new VariableException(VariableException.Kind.EmptyString);
+        if (!isValidName(name))
+            throw new VariableException(VariableException.Kind.InvalidName);
+        final int index = variableSet.size();
+        if (!variableSet.containsKey(name))
+            variableSet.put(name, index);
+    }
+
     public void addAll(String[] c) throws VariableException {
         for (String name : c)
             add(name);
     }
 
-    public void addAll(Collection<? extends String> c) throws VariableException {
+    public void addAll(Iterable<? extends String> c) throws VariableException {
         for (String name : c)
             add(name);
     }
 
     public void addAll(Variables other) throws VariableException {
         addAll(other.getNameSet());
+    }
+
+    // same as 'addAll' but it does no effect when the variable 'name' already exists
+    public void addAllNew(String[] c) throws VariableException {
+        for (String name : c)
+            addNew(name);
+    }
+
+    public void addAllNew(Iterable<? extends String> c) throws VariableException {
+        for (String name : c)
+            addNew(name);
+    }
+
+    public void addAllNew(Variables other) throws VariableException {
+        addAllNew(other.getNameSet());
     }
 
     /// HELPERS ...........
