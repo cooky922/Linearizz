@@ -53,7 +53,7 @@ public class Variables {
     }
 
     // same as 'add' but it does no effect when the variable 'name' already exists
-    public void addNew(String name) throws VariableException {
+    public void addIfNew(String name) throws VariableException {
         if (name.isEmpty())
             throw new VariableException(VariableException.Kind.EmptyString);
         if (!isValidName(name))
@@ -78,18 +78,18 @@ public class Variables {
     }
 
     // same as 'addAll' but it does no effect when the variable 'name' already exists
-    public void addAllNew(String[] c) throws VariableException {
+    public void addAllIfNew(String[] c) throws VariableException {
         for (String name : c)
-            addNew(name);
+            addIfNew(name);
     }
 
-    public void addAllNew(Iterable<? extends String> c) throws VariableException {
+    public void addAllIfNew(Iterable<? extends String> c) throws VariableException {
         for (String name : c)
-            addNew(name);
+            addIfNew(name);
     }
 
-    public void addAllNew(Variables other) throws VariableException {
-        addAllNew(other.getNameSet());
+    public void addAllIfNew(Variables other) throws VariableException {
+        addAllIfNew(other.getNameSet());
     }
 
     /// HELPERS ...........
