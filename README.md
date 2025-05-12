@@ -30,7 +30,7 @@ Before clicking the solve button, the user has to give equations to solve which 
 Of course, error handling has been implemented in such a way that the user can easily fix based on the given suggestions by the application. The application will give hints by providing tooltips that display appropriate error messages.
 
 ## How to Download?
-You can get the latest prerelease [here](https://github.com/cooky922/Linearizz/releases/tag/beta)
+You can get the latest prerelease [here](https://github.com/cooky922/Linearizz/releases/tag/v0.1-beta)
 
 ## How to Reproduce the Application using Source Files?
 
