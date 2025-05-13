@@ -145,79 +145,201 @@ public class Equations {
     //
     // <variable-term>
     // | ('+' | '-') ? <variable-name>
-    // | ('+' | '-') ? <number> <variable-name>
+    // | ('+' | '-') ? <number-atom> <variable-name>
+    // | ('+' | '-') ? <variable-name> '/' <number-atom>
+    // | ('+' | '-') ? <number-atom> <variable-name> '/' <number-atom>
     // 
     // <number>
-    // [TODO: add fraction notation]
+    // | <number-atom> ('/' <number-atom>) ?
+
+    // <number-atom>
     // | <digit (>= 1) ...> '.' ?
     // | <digit (>= 0) ...> '.' <digit (>= 1) ...>
+
     //
     // <variable-name>
     // | <letter> <digit (>= 0) ...>
     private List<Token> parseEquation(String eq, boolean savesVariables) throws EquationException {
         if (eq.isEmpty())
             throw new EquationException(EquationException.Kind.EmptyString);
+        return new EquationParser(eq, savesVariables).collectTokens();
+    }
 
-        List<Token> tokens = new ArrayList<>();
-        Variables newVariables = new Variables();
+    // non-static class serve as state machine
+    // for parsing an equation
+    private class EquationParser {
+        private final String eq;
+        private final boolean savesVariables;
+        private final Variables newVariables = new Variables();
 
-        int i = 0;
-        final int len = eq.length();
+        // state variables
+        private List<Token> tokens = new ArrayList<>();
+        private int i = 0;
+        private int len;
+        private boolean sawEqual = false;
+        private boolean sawFirstTerm = false;
+        private boolean sawDigit = false;
+        private boolean sawDot   = false;
 
-        boolean sawEqual = false, sawFirstTerm = false;
+        public EquationParser(String eq, boolean savesVariables) {
+            this.eq = eq;
+            this.savesVariables = savesVariables;
+            this.len = eq.length();
+        }
 
-        while (i < len) {
-            // ignore if whitespace characters
+        // can only be called once
+        public List<Token> collectTokens() {
+            for (;;) {
+                skipWhitespace();
+                if (!hasNextChar())
+                    break;
+                nextToken();
+            }
+            finalizeParse();
+            return tokens;
+        }
+
+        /// IMPLEMENTATION DETAILS
+        private boolean hasNextChar() {
+            return i < len;
+        }
+
+        private void skipWhitespace() {
             while (i < len && Character.isWhitespace(eq.charAt(i)))
                 ++i;
+        }
 
-            // exit if it has reached the end
-            if (i >= len)
-                break;
+        private char currentChar() {
+            return eq.charAt(i);
+        }
 
-            char ch = eq.charAt(i);
+        private void nextChar() {
+            ++i;
+        }
 
-            // encounters '='
+        private void nextToken() {
+            char ch = currentChar();
             if (ch == '=') {
-                if (!sawEqual) {
-                    if (tokens.isEmpty())
-                        throw new EquationException(EquationException.Kind.NoExprBeforeEqual);
-                    sawEqual = true;
-                } else {
-                    throw new EquationException(EquationException.Kind.MoreEqual);
-                }
-                tokens.add(new EqualToken());
-                sawFirstTerm = false;
-                ++i;
-                continue;
+                parseEqual(); // creates '=' token
+                return; // done for this token
             }
+            int sign = parseSign();
+            if (!hasNextChar())
+                return;
+            double num = 0;
+            // if it encounters a number atom
+            ch = currentChar();
+            if (Character.isDigit(ch) || ch == '.')
+                num = parseNumberAtom();
+            skipWhitespace();
+            // if it contains any character left
+            if (hasNextChar()) {
+                // <number> ? <variable> , ...
+                // - constructs variable term token
+                if (Character.isLetter(currentChar())) {
+                    String name = parseVariableName();
+                    if (autoAdd) {
+                        if (!newVariables.containsName(name) || !variables.containsName(name))
+                            newVariables.addIfNew(name);
+                    } else {
+                        if (!variables.containsName(name))
+                            throw new EquationException(EquationException.Kind.NoVariableFound);
+                    }
+                    // 'num' will serve as coefficient
+                    double coeff = sawDigit ? num * sign : 1.0 * sign;
+                    double denom = 1.0;
+                    skipWhitespace();
+                    if (hasNextChar() && currentChar() == '/') {
+                        // expects a number after '/' or else error
+                        nextChar();
+                        skipWhitespace();
+                        if (!hasNextChar() || (!Character.isDigit(currentChar()) && currentChar() != '.'))
+                            throw new EquationException(EquationException.Kind.NoNumberAfterSlash);
+                        sawDigit = false;
+                        sawDot = false;
+                        denom = parseNumberAtom();
+                        if (denom == 0)
+                            throw new EquationException(EquationException.Kind.DivisionByZero);
+                        coeff /= denom;
+                    }
+                    tokens.add(new VariableTermToken(coeff, name));
+                }
+                // <number>, ...
+                // - constructs constant term token
+                else if (sawDigit) {
+                    double denom = 1.0;
+                    // saw '/' operator
+                    if (currentChar() == '/') {
+                        // expects a number after '/' or else error
+                        nextChar();
+                        skipWhitespace();
+                        if (!hasNextChar() || (!Character.isDigit(currentChar()) && currentChar() != '.'))
+                            throw new EquationException(EquationException.Kind.NoNumberAfterSlash);
+                        sawDigit = false;
+                        sawDot = false;
+                        denom = parseNumberAtom();
+                        if (denom == 0)
+                            throw new EquationException(EquationException.Kind.DivisionByZero);
+                        num /= denom;
+                    }
+                    tokens.add(new ConstantTermToken(num * sign));
+                }
+                // error: invalid character
+                else {
+                    throw new EquationException(EquationException.Kind.InvalidCharacter);
+                }
+            } else {
+                // no characters left and didn't see any digit
+                if (!sawDigit)
+                    throw new EquationException(EquationException.Kind.InvalidCharacter);
+                tokens.add(new ConstantTermToken(num * sign));
+            }
+            sawFirstTerm = true;
+            sawDigit = false;
+            sawDot = false;
+        }
 
+        private void parseEqual() {
+            if (!sawEqual) {
+                if (tokens.isEmpty())
+                    throw new EquationException(EquationException.Kind.NoExprBeforeEqual);
+                sawEqual = true;
+            } else {
+                throw new EquationException(EquationException.Kind.MoreEqual);
+            }
+            tokens.add(new EqualToken());
+            // resets sawFirstTerm
+            sawFirstTerm = false;
+            nextChar(); // consumes '='
+        }
+
+        private int parseSign() {
             // encounters '+' or '-'
             // - optional sign in every first term
             // - requires sign for other terms
+            char ch = currentChar();
             int sign = 1;
             if (ch == '+' || ch == '-') {
-                sign = (ch == '-') ? -1 : 1;
-                ++i;
-                // skip any space after sign
-                while (i < len && Character.isWhitespace(eq.charAt(i)))
-                    ++i;
+                sign = (ch == '-') ? - 1 : 1;
+                nextChar(); // consumes '+' or '-'
+                skipWhitespace();
             } else if (sawFirstTerm) {
                 throw new EquationException(EquationException.Kind.UnseparatedTerms);
             }
+            return sign;
+        }
 
-            // try to parse a number
+        private double parseNumberAtom() {
             double num = 0;
             int numStartIdx = i;
-            boolean sawDigit = false, sawDot = false;
-            while (i < len) {
-                char d = eq.charAt(i);
-                if (Character.isDigit(d)) {
+            while (hasNextChar()) {
+                char ch = currentChar();
+                if (Character.isDigit(ch)) {
                     sawDigit = true;
-                    ++i;
-                } else if (d == '.' && !sawDot) {
+                    nextChar();
+                } else if (ch == '.' && !sawDot) {
                     sawDot = true;
-                    ++i;
+                    nextChar();
                 } else {
                     break;
                 }
@@ -226,50 +348,27 @@ public class Equations {
                 String numText = eq.substring(numStartIdx, i);
                 num = Double.parseDouble(numText);
             }
-
-            // skip whitespaces before checking for variable name
-            while (i < len && Character.isWhitespace(eq.charAt(i)))
-                ++i;
-
-            // check for variable name
-            if (i < len && Character.isLetter(eq.charAt(i))) {
-                int nameStartIdx = i;
-                ++i;
-                if (i < len && Character.isLetter(eq.charAt(i)))
-                    throw new EquationException(EquationException.Kind.InvalidVariableName);
-                while (i < len && Character.isDigit(eq.charAt(i)))
-                    ++i;
-                String name = eq.substring(nameStartIdx, i);
-
-                // if autoAdd = false, throw if it doesn't contain the key
-                // if autoAdd = true, add the variable name to the set
-                if (autoAdd) {
-                    if (!newVariables.containsName(name) || !variables.containsName(name))
-                        newVariables.addIfNew(name);
-                } else {
-                    if (!variables.containsName(name))
-                        throw new EquationException(EquationException.Kind.NoVariableFound);
-                }
-                double coeff = sawDigit ? num * sign : 1.0 * sign;
-                tokens.add(new VariableTermToken(coeff, name));
-                sawFirstTerm = true;
-            } else {
-                // no variable, so it must be a constant term
-                if (!sawDigit)
-                    throw new EquationException(EquationException.Kind.InvalidCharacter);
-                tokens.add(new ConstantTermToken(num * sign));
-                sawFirstTerm = true;
-            }
+            return num;
         }
 
-        if (!sawEqual)
-            throw new EquationException(EquationException.Kind.NoEqual);
-        else if (tokens.get(tokens.size() - 1) instanceof EqualToken)
-            throw new EquationException(EquationException.Kind.NoExprAfterEqual);
+        private String parseVariableName() {
+            int nameStartIdx = i;
+            nextChar();
+            // it encounters a second letter [error]
+            if (hasNextChar() && Character.isLetter(currentChar()))
+                throw new EquationException(EquationException.Kind.InvalidVariableName);
+            while (hasNextChar() && Character.isDigit(currentChar()))
+                nextChar();
+            return eq.substring(nameStartIdx, i);
+        }
 
-        if (autoAdd && savesVariables)
-            variables.addAllIfNew(newVariables);
-
-        return tokens;
+        private void finalizeParse() {
+            if (!sawEqual)
+                throw new EquationException(EquationException.Kind.NoEqual);
+            else if (tokens.get(tokens.size() - 1) instanceof EqualToken)
+                throw new EquationException(EquationException.Kind.NoExprAfterEqual);
+            if (autoAdd && savesVariables)
+                variables.addAllIfNew(newVariables);
+        }
     }
 }
