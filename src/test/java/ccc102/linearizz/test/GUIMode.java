@@ -174,6 +174,7 @@ public class GUIMode extends JFrame {
                 case 0:
                     if (autoRegister) {
                         variableInputField.setEditable(true);
+                        variableInputField.setFocusable(true);
                         addVariableButton.setEnabled();
                         clearVariableButton.setEnabled();
                         // transfer variables to this equations object
@@ -197,6 +198,7 @@ public class GUIMode extends JFrame {
                 case 1:
                     if (!autoRegister) {
                         variableInputField.setEditable(false);
+                        variableInputField.setFocusable(false);
                         variableInputField.setText("");
                         addVariableButton.setDisabled();
                         clearVariableButton.doClick(); // calls variables.clear()
@@ -539,6 +541,7 @@ public class GUIMode extends JFrame {
         outputArea = new JTextArea(5, 50);
         outputArea.setText("");
         outputArea.setEditable(false);
+        outputArea.setFocusable(false);
         outputArea.setLineWrap(true);
         outputArea.setFont(ZScheme.labelFont);
         outputArea.setForeground(ZScheme.colorGray);
