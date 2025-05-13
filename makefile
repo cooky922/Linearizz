@@ -15,7 +15,7 @@ SRC_MAIN_FILES := \
 SRC_TEST_FILES := \
 	$(wildcard $(SRC_TEST_DIR)/ccc102/linearizz/test/*.java)
 
-.PHONY: build run
+.PHONY: build run clean
 
 ####################################
 
@@ -37,3 +37,7 @@ build: build-main build-test build-jar
 
 run:
 	@java -jar $(JAR_FILE)
+
+clean:
+	@echo Deleting '.class' files
+	@del /S *.class

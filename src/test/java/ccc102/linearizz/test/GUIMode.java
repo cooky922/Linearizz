@@ -17,14 +17,14 @@ import ccc102.linearizz.gui.*;
 
 // TODO: add shortcuts, optimizes the GUI
 
-public class GUIMode extends JFrame implements ZScheme {
+public class GUIMode extends JFrame {
 
     private static final int timerDelay = 1000;
-    private static LineBorder baseBorder = new LineBorder(colorGray, 3, true);
+    private static LineBorder baseBorder = new LineBorder(ZScheme.colorGray, 3, true);
 
     /// Within Variable Panel
     // selects either manual or automatic variable register
-    private JComboBox<String> registerModeBox;
+    private ZComboBox<String> registerModeBox;
     private ZTextField variableInputField;
     private ZButton addVariableButton;
     private JPanel variableListPanel;
@@ -100,10 +100,10 @@ public class GUIMode extends JFrame implements ZScheme {
 
     // build once
     private ZButton buildSolveButton() {
-        ZButton button = new ZButton("Solve", colorGreen, true);
+        ZButton button = new ZButton("Solve", ZScheme.colorGreen, true);
         // disabled by default, only enable if all equations are solvable
         button.setDisabled();
-        button.setFont(titleFont.deriveFont(14.0f));
+        button.setFont(ZScheme.titleFont.deriveFont(14.0f));
         button.addActionListener(e -> {
             for (ZTextField equationField : equationFields.keySet())
                 equations.add(equationField.getText().trim());
@@ -148,7 +148,8 @@ public class GUIMode extends JFrame implements ZScheme {
     private JPanel buildVariablePanel() {
         JPanel panel = new JPanel();
         TitledBorder border = new TitledBorder(baseBorder, "Variables");
-        border.setTitleFont(titleFont);
+        border.setTitleFont(ZScheme.titleFont);
+        border.setTitleColor(ZScheme.colorGray);
         panel.setBorder(border);
         panel.setLayout(new GridBagLayout());
 
@@ -160,11 +161,12 @@ public class GUIMode extends JFrame implements ZScheme {
         // VARIABLE PANEL
         // | 
         // | TOP ROW
-        // | | registerModeBox [JComboBox]
+        // | | registerModeBox [ZComboBox]
         // | 
-        registerModeBox = new JComboBox<>(new String[] {"Manual Register", "Automatic Register"});
-        registerModeBox.setFont(labelFont);
-        registerModeBox.setForeground(colorGray);
+        registerModeBox = new ZComboBox<>(
+            new String[] {"Manual Register", "Automatic Register"},
+            ZScheme.colorBlue    
+        );
         registerModeBox.addActionListener(e -> {
             final int index = registerModeBox.getSelectedIndex();
             switch (index) {
@@ -206,7 +208,6 @@ public class GUIMode extends JFrame implements ZScheme {
                 default:;
             }
         });
-        ZComboBoxUI.install(registerModeBox, colorBlue);
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 4;
@@ -233,7 +234,7 @@ public class GUIMode extends JFrame implements ZScheme {
         gbc.anchor = GridBagConstraints.LINE_START;
         panel.add(variableInputField, gbc);
 
-        addVariableButton = new ZButton("Add", colorGreen);
+        addVariableButton = new ZButton("Add", ZScheme.colorGreen);
         addVariableButton.addActionListener(e -> {
             String varName = variableInputField.getText().trim();
             try {
@@ -284,14 +285,14 @@ public class GUIMode extends JFrame implements ZScheme {
         // | | variableListPanel [JPanel] [3/4 width]
         // | | clearVariableButton [JButton] [1/4 width]
         variableListPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
-        variableListPanel.setBackground(colorLightGray);
+        variableListPanel.setBackground(ZScheme.colorLightGray);
         variableScrollPane = new JScrollPane(variableListPanel,
             JScrollPane.VERTICAL_SCROLLBAR_NEVER,
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
         );
         // make it invisible to make it "less" annoying
         variableScrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 0));
-        variableScrollPane.setBackground(colorLightGray);
+        variableScrollPane.setBackground(ZScheme.colorLightGray);
         variableScrollPane.setBorder(new EmptyBorder(4, 4, 4, 4));
 
         gbc.gridx = 0;
@@ -301,7 +302,7 @@ public class GUIMode extends JFrame implements ZScheme {
         gbc.anchor = GridBagConstraints.LINE_START;
         panel.add(variableScrollPane, gbc);
 
-        clearVariableButton = new ZButton("Clear", colorPurple);
+        clearVariableButton = new ZButton("Clear", ZScheme.colorPurple);
         clearVariableButton.addActionListener(e -> {
             variables.clear();
             variableInputField.setText("");
@@ -333,7 +334,8 @@ public class GUIMode extends JFrame implements ZScheme {
     private JPanel buildEquationPanel() {
         JPanel panel = new JPanel();
         TitledBorder border = new TitledBorder(baseBorder, "Equations");
-        border.setTitleFont(titleFont);
+        border.setTitleFont(ZScheme.titleFont);
+        border.setTitleColor(ZScheme.colorGray);
         panel.setBorder(border);
         panel.setLayout(new GridBagLayout());
 
@@ -369,8 +371,8 @@ public class GUIMode extends JFrame implements ZScheme {
         // | BOTTOM ROW
         // | | addEquationButton [JButton]
         // | | clearEquationButton [JButton]
-        addEquationButton = new ZButton("Add", colorGreen);
-        addEquationButton.setFont(labelFont.deriveFont(10.0f));
+        addEquationButton = new ZButton("Add", ZScheme.colorGreen);
+        addEquationButton.setFont(ZScheme.labelFont.deriveFont(11.0f));
         // disable 'add' first
         // enable only when all equations are valid
         addEquationButton.setDisabled();
@@ -393,8 +395,8 @@ public class GUIMode extends JFrame implements ZScheme {
         gbc.anchor = GridBagConstraints.PAGE_END;
         panel.add(addEquationButton, gbc);
 
-        clearEquationButton = new ZButton("Clear", colorPurple);
-        clearEquationButton.setFont(labelFont.deriveFont(10.0f));
+        clearEquationButton = new ZButton("Clear", ZScheme.colorPurple);
+        clearEquationButton.setFont(ZScheme.labelFont.deriveFont(11.0f));
         clearEquationButton.addActionListener(e -> {
             equationListPanel.removeAll();
             for (FieldStatus status : equationFields.values())
@@ -444,7 +446,7 @@ public class GUIMode extends JFrame implements ZScheme {
             }
         });
 
-        ZButton removeButton = new ZButton("X", colorRed);
+        ZButton removeButton = new ZButton("X", ZScheme.colorRed);
         Component strut = Box.createVerticalStrut(5);
         // remove one text field if remove button is clicked
         removeButton.addActionListener(e -> {
@@ -526,24 +528,25 @@ public class GUIMode extends JFrame implements ZScheme {
     // build once
     private JPanel buildOutputPanel() {
         // ====== OUTPUT PANEL ======
-        JPanel outputPanel = new JPanel();
-        outputPanel.setLayout(new BoxLayout(outputPanel, BoxLayout.PAGE_AXIS));
-        TitledBorder outputBorder = new TitledBorder(baseBorder, "Output");
-        outputBorder.setTitleFont(titleFont);
-        outputPanel.setBorder(outputBorder);
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
+        TitledBorder border = new TitledBorder(baseBorder, "Output");
+        border.setTitleFont(ZScheme.titleFont);
+        border.setTitleColor(ZScheme.colorGray);
+        panel.setBorder(border);
 
         // OUTPUT PANEL <== OUTPUT TEXT
         outputArea = new JTextArea(5, 50);
         outputArea.setText("");
         outputArea.setEditable(false);
         outputArea.setLineWrap(true);
-        outputArea.setFont(labelFont);
-        outputArea.setForeground(colorGray);
+        outputArea.setFont(ZScheme.labelFont);
+        outputArea.setForeground(ZScheme.colorGray);
         JScrollPane outputScroll = new JScrollPane(outputArea);
 
-        outputPanel.add(outputScroll);
+        panel.add(outputScroll);
 
-        return outputPanel;
+        return panel;
     }
 
     public static void setWindowsLookAndFeel() {
