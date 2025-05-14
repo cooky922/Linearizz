@@ -8,29 +8,58 @@ NOTE: This application is a CCC102 Finals Project showcasing OOP and Swing GUI s
 
 ## What Does It Look Like?
 <p float="left">
-<img src="./docs/images/screenshot-intro.png" width=25% height=25%>
-<img src="./docs/images/screenshot-auto-answer.png" width=25% height=25%>
-<img src="./docs/images/screenshot-error.png" width=25% height=25%>
+<img src="./docs/images/linearizz-ss-0.png" width=25% height=25%>
+<img src="./docs/images/linearizz-ss-1.png" width=25% height=25%>
+<img src="./docs/images/linearizz-ss-2.png" width=25% height=25%>
 </p>
 
 ## Features
-This calculator application offers two modes:
-* Manual Variable Register
-* Automatic Variable Register
+This is how you use the application:
+1. Enter variables (manual register mode by default).
+2. Input equations in the provided fields.
+3. Click solve and view results in fraction or decimal form.
 
-Before solving equations, the user must configure what variables to use. In the case of manual mode, the user has to manually add the variables needed. Otherwise, the variables will be automatically registered based on the equations input.
+The application identifies whether the system has:
+* exactly one solution
+* no solution
+* infinitely many solutions
+* undetermined or overdetermined cases (#equations != #variables)
 
-Before clicking the solve button, the user has to give equations to solve which are only limited to simple expressions (no multiplication nor division). As stated in the title, the calculator tries to solve the system of linear equations and gives one of the possible outputs:
-* the system has exactly one solution
-* the system has no solutions (inconsistent system)
-* the system has infinitely many solutions
-* the system is underdetermined (the system may have infinitely many solutions)
-* the system is overdetermined (the system may have no solutions)
+In case you enter the wrong syntax of the variable name or the equation, error handling with contextual tooltips will guide you to correct typos or malformed equations.
 
-Of course, error handling has been implemented in such a way that the user can easily fix based on the given suggestions by the application. The application will give hints by providing tooltips that display appropriate error messages.
+The application provides configurable calculator settings:
+* variable register mode:
+   * manual (default): you explicitly add each variable name before solving
+   * automatic: variables are automatically added from your equation input.
+* output mode:
+   * fraction (default): solutions are displayed as exact fractions
+   * decimal: solutions are displayed in decimal form (note the consequences of using binary floating-point as a data type)
+
+In order for you to know how to enter valid variable names or equations, here is the guide or grammar for these:
+* variable names must start with one letter and may be followed by digits (e.g. `x`, `y1`, `z0001`)
+* equation grammar:
+```
+<equation>      ::= <expr> '=' <expr>
+<expr>          ::= <term> { <term> }
+<term>          ::= <constant-term>
+                  | <variable-term>
+<constant-term> ::= ['+'|'-'] <number>
+<variable-term> ::= ['+'|'-'] <variable-name>
+                  | ['+'|'-'] <number-atom> <variable-name>
+                  | ['+'|'-'] <variable-name> '/' <number-atom>
+                  | ['+'|'-'] <number-atom> <variable-name> '/' <number-atom>
+<number>        ::= <number-atom> [ '/' <number-atom> ]
+<number-atom>   ::= digits [ '.' ] | [ '.' ] digits
+<variable-name> ::= letter { digit }
+```
+   * you can only have a linear term for each in the expression on both sides of the equation (that's why it is linear equation)
+   * there is only a limited set of arithmetic operations used (no exponents, no grouping, no other functions)
+     * each term is separated by `+` or `-` and each number can be a fraction or a decimal
 
 ## How to Download?
-You can get the latest prerelease [here](https://github.com/cooky922/Linearizz/releases/tag/v0.1-beta)
+You can get the latest prerelease [here](https://github.com/cooky922/Linearizz/releases/tag/v0.2-beta)
+
+[NOTE: the prebuilt `.jar` file requires you to run on JVM environment of JDK 24 installed on your desktop]
 
 ## How to Reproduce the Application using Source Files?
 
@@ -56,6 +85,6 @@ Frontend:
 - [X] GUI Functionality Implementation
       
 Final Stages:
-- [ ] Final Fixes
-- [ ] Testing
+- [X] Final Fixes
+- [X] Testing
 - [ ] Deployment
