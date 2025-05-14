@@ -36,7 +36,7 @@ public class ZComboBoxUI extends BasicComboBoxUI {
         b.setForeground(Color.WHITE);
         return b;
     }
-
+    
     @Override
     public void paintCurrentValueBackground(Graphics g, Rectangle bounds, boolean hasFocus) {
         Graphics2D g2 = (Graphics2D) g;
