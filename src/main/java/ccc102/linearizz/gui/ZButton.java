@@ -1,6 +1,8 @@
 package ccc102.linearizz.gui;
 
 import java.awt.Color;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseAdapter;
 import javax.swing.JButton;
 
 public class ZButton extends JButton {
@@ -17,6 +19,19 @@ public class ZButton extends JButton {
         setForeground(Color.WHITE);
         setBackground(backColor);
         setUI(new ZButtonUI());
+        addMouseListener(new MouseAdapter() {
+            @Override 
+            public void mouseEntered(MouseEvent e) {
+                if (ZButton.this.isEnabled())
+                    ZButton.this.setBackground(brighterColor(backColor, 1.1f));
+            }
+
+            @Override 
+            public void mouseExited(MouseEvent e) {
+                if (ZButton.this.isEnabled())
+                    ZButton.this.setBackground(backColor);
+            }
+        });
     }
 
     public ZButton(String name, Color backColor) {
@@ -31,5 +46,13 @@ public class ZButton extends JButton {
     public void setDisabled() {
         setEnabled(false);
         setBackground(disabledColor);
+    }
+
+    /// IMPLEMENTATION DETAILS
+    private static Color brighterColor(Color c, double factor) {
+        final int r = (int) Math.min(255, c.getRed() * factor);
+        final int g = (int) Math.min(255, c.getGreen() * factor);
+        final int b = (int) Math.min(255, c.getBlue() * factor);
+        return new Color(r, g, b);
     }
 }
