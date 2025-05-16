@@ -19,7 +19,8 @@ public class EquationException extends RuntimeException {
         NoVariableFound,     // no variable found
         NoNumberAfterSlash,  // no number after '/'
         DivisionByZero,      // division by 0
-        EmptyString          // empty string
+        EmptyString,         // empty string
+        NoTermAfterSign      // no term after sign
     }
 
     private static String createMessageFromKind(Kind kind) {
@@ -48,6 +49,8 @@ public class EquationException extends RuntimeException {
                 return "the equation contains division by zero";
             case Kind.EmptyString:
                 return "the equation is empty";
+            case Kind.NoTermAfterSign:
+                return "the equation ends with a sign but not followed by any term";
             default:
                 return "unknown error";
         }
