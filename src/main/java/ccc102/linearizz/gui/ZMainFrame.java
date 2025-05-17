@@ -7,7 +7,7 @@ import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.net.URI;
 
 import ccc102.linearizz.*;
@@ -61,7 +61,7 @@ public class ZMainFrame extends JFrame {
     // > logics
     private Variables variables = new Variables();
     private Equations equations = new Equations(variables); // manual by default
-    private Map<ZTextField, FieldStatus> equationFields = new HashMap<>();
+    private Map<ZTextField, FieldStatus> equationFields = new LinkedHashMap<>();
 
     public ZMainFrame() {
         super("Linearizz App");
@@ -703,21 +703,16 @@ public class ZMainFrame extends JFrame {
         Timer newTimer = new Timer(hasDelay ? timerDelay : 0, e -> {
             String text = textField.getText().trim();
             boolean isValid = false;
-            String errorMessage = "";
 
             try {
                 equations.validateEquation(text);
-                isValid = true;
-            } catch (Exception ex) {
-                errorMessage = ex.getMessage();
-            }
-
-            if (isValid) {
                 textField.setNormalMode();
                 textField.setToolTipText(null);
                 // enables 'add' equation button
                 addEquationButton.setEnabled();
-            } else {
+                isValid = true;
+            } catch (Exception ex) {
+                String errorMessage = ex.getMessage();
                 textField.setErrorMode();
                 textField.setToolTipText(errorMessage);
                 // disables 'add' equation button
@@ -747,8 +742,9 @@ public class ZMainFrame extends JFrame {
     }
 
     private void doSolve() {
-        for (ZTextField equationField : equationFields.keySet())
+        for (ZTextField equationField : equationFields.keySet()) {
             equations.add(equationField.getText().trim());
+        }
         try {
             ExtractResult extract = equations.extractValues();
             Matrix A = extract.getCoefficients();
