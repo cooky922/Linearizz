@@ -180,6 +180,7 @@ public class Equations {
         private boolean sawFirstTerm = false;
         private boolean sawDigit = false;
         private boolean sawDot   = false;
+        private boolean sawSign  = false;
 
         public EquationParser(String eq, boolean savesVariables) {
             this.eq = eq;
@@ -224,8 +225,11 @@ public class Equations {
                 return; // done for this token
             }
             int sign = parseSign();
-            if (!hasNextChar())
+            if (!hasNextChar()) {
+                if (sawSign)
+                    throw new EquationException(EquationException.Kind.NoTermAfterSign);
                 return;
+            }
             double num = 0;
             // if it encounters a number atom
             ch = currentChar();
@@ -297,6 +301,7 @@ public class Equations {
             sawFirstTerm = true;
             sawDigit = false;
             sawDot = false;
+            sawSign = false;
         }
 
         private void parseEqual() {
@@ -322,6 +327,7 @@ public class Equations {
             if (ch == '+' || ch == '-') {
                 sign = (ch == '-') ? - 1 : 1;
                 nextChar(); // consumes '+' or '-'
+                sawSign = true;
                 skipWhitespace();
             } else if (sawFirstTerm) {
                 throw new EquationException(EquationException.Kind.UnseparatedTerms);
