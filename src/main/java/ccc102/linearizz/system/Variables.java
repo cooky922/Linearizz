@@ -1,26 +1,23 @@
 package ccc102.linearizz.system;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Set;
+import java.util.LinkedHashSet;
 import ccc102.linearizz.exceptions.VariableException;
 
 public class Variables {
-    // each name is mapped to its index (the order of variables)
-    private Map<String, Integer> variableSet = new HashMap<>();
+    // use linked hash set to preserve the order of variables
+    // respect to insertion order
+    private Set<String> variableSet = new LinkedHashSet<>();
 
     // get variable names in set
     public Set<String> getNameSet() {
-        return variableSet.keySet();
+        return variableSet;
     }
 
-    // get variable names in order
+    // get variable names in array
     public String[] getNames() {
-        String[] result = new String[variableSet.size()];
-        for (Map.Entry<String, Integer> entry : variableSet.entrySet())
-            result[entry.getValue().intValue()] = entry.getKey();
-        return result;
+        return variableSet.toArray(String[]::new);
     }
 
     // clears all variable names
@@ -38,7 +35,7 @@ public class Variables {
     }
 
     public boolean containsName(String name) {
-        return variableSet.containsKey(name);
+        return variableSet.contains(name);
     }
 
     public void add(String name) throws VariableException {
@@ -46,10 +43,9 @@ public class Variables {
             throw new VariableException(VariableException.Kind.EmptyString);
         if (!isValidName(name))
             throw new VariableException(VariableException.Kind.InvalidName);
-        final int index = variableSet.size();
-        if (variableSet.containsKey(name))
+        if (variableSet.contains(name))
             throw new VariableException(VariableException.Kind.AlreadyExisted);
-        variableSet.put(name, index);
+        variableSet.add(name);
     }
 
     // same as 'add' but it does no effect when the variable 'name' already exists
@@ -58,9 +54,8 @@ public class Variables {
             throw new VariableException(VariableException.Kind.EmptyString);
         if (!isValidName(name))
             throw new VariableException(VariableException.Kind.InvalidName);
-        final int index = variableSet.size();
-        if (!variableSet.containsKey(name))
-            variableSet.put(name, index);
+        if (!variableSet.contains(name))
+            variableSet.add(name);
     }
 
     public void addAll(String[] c) throws VariableException {
